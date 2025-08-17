@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>TikFinity Sequenzen mit Events</title>
+<style>
+  body { margin:0; overflow:hidden; background:black; }
+  iframe {
+    position:absolute; width:100%; height:100%; border:none;
+    opacity:0; transition:opacity 1s ease-in-out; pointer-events:none;
+  }
+  iframe.active { opacity:1; pointer-events:auto; }
+  iframe.highlight {
+    box-shadow: 0 0 50px gold; transform: scale(1.05); transition: all 0.5s ease;
+  }
+</style>
+</head>
+<body>
+
+<iframe src="https://tikfinity.zerody.one/widget/topliker?cid=14363" class="active"></iframe>
+<iframe src="https://tikfinity.zerody.one/widget/topgifter?cid=14363"></iframe>
+<iframe src="https://tikfinity.zerody.one/widget/topg?cid=14363"></iframe>
+<iframe src="https://tikfinity.zerody.one/widget/tops?cid=14363"></iframe>
+<iframe src="https://tikfinity.zerody.one/widget/gcounter?cid=14363&c=1"></iframe>
+
+<script>
+const iframes = document.querySelectorAll('iframe');
+let current = 0;
+setInterval(() => {
+  iframes[current].classList.remove('active');
+  current = (current + 1) % iframes.length;
+  iframes[current].classList.add('active');
+}, 10000);
+
+const socket = new WebSocket('ws://localhost:21213/');
+socket.addEventListener('open', () => console.log('Verbunden mit TikFinity WebSocket'));
+socket.addEventListener('message', (event) => {
+  const data = JSON.parse(event.data);
+  if(data.type==='gift'||data.type==='like'){
+    iframes[current].classList.add('highlight');
+    setTimeout(()=>iframes[current].classList.remove('highlight'), data.type==='gift'?1000:500);
+  }
+});
+</script>
+</body>
+</html>
